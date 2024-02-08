@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { PrismaClient } from "@prisma/client";
 
-import { Result, Unpacked } from "../../types";
+import { Result, Unpacked } from "../../types/index";
 import { ModelKeys, Statistics } from "./types";
 import {
   add_factory,
