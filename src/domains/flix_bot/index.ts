@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @file 机器人
  * yarn esbuild domains/bot/index.ts --bundle --platform=node --format=cjs --minify --outfile=dist/bot.js

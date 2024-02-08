@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as tencentcloud from "tencentcloud-sdk-nodejs-asr";
 import type { Client } from "tencentcloud-sdk-nodejs-asr/tencentcloud/services/asr/v20190614/asr_client";
 

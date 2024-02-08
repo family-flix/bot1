@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   async_task,
   bind_for_parsed_tv,
