@@ -36,7 +36,7 @@ import qrcodeTerminal from "qrcode-terminal";
  * to     `import { ... } from 'wechaty'`
  * when you are runing with Docker or NPM instead of Git Source.
  */
-import { WechatyBuilder, type } from "wechaty";
+import { WechatyBuilder, types } from "wechaty";
 
 import { FlixWechatBot, App } from "@/domains/flix_bot";
 
@@ -56,7 +56,7 @@ bot
   .on("message", async function (msg) {
     console.log(`RECV: ${msg}`);
 
-    if (msg.type() !== type.Message.Audio) {
+    if (msg.type() !== types.Message.Audio) {
       return; // skip no-VOICE message
     }
 
