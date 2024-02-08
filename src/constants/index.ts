@@ -1,4 +1,4 @@
-import type { Statistics } from "@/domains/store/types";
+import type { Statistics } from "../domains/store/types";
 
 export const __VERSION__ = "2.1.0";
 

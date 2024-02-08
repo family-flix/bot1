@@ -4,10 +4,10 @@
  */
 import type { ReadStream } from "fs";
 
-import { Application } from "@/domains/application";
-import type { DatabaseStore } from "@/domains/store";
-import { SpeechToText } from "@/domains/speech";
-import { Result } from "@/types";
+import { Application } from "../application";
+import type { DatabaseStore } from "../store";
+import { SpeechToText } from "../speech";
+import { Result } from "../../types";
 
 type FlixWechatBotProps = {
   app: Application;

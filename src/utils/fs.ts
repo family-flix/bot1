@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import path from "path";
 import { accessSync, mkdirSync } from "fs";
 
-import { Result } from "@/types";
+import { Result } from "../types";
 
 /**
  * 确保某个路径必然存在

@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@chatie/tsconfig": "^0.10.1",
     "@tensorflow-models/handpose": "0.0.6",
     "@tensorflow/tfjs-node": "^2.7.0",
     "canvas": "^2.6.1",

@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
 import { PrismaClient } from "@prisma/client";
 
-import { FileType } from "@/constants";
-import { Result, resultify, Unpacked } from "@/types";
-import { sleep } from "@/utils";
+import { FileType } from "../../constants";
+import { Result, resultify, Unpacked } from "../../types";
+import { sleep } from "../../utils";
 
 import { ModelKeys, ModelParam, ModelQuery } from "./types";
 

@@ -2,8 +2,8 @@ import path from "path";
 
 import { PrismaClient } from "@prisma/client";
 
-import type { DatabaseStore } from "@/domains/store";
-import { ensure } from "@/utils/fs";
+import type { DatabaseStore } from "../store";
+import { ensure } from "../../utils/fs";
 
 let cached: null | DatabaseStore = null;
 

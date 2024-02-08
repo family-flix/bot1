@@ -13,10 +13,7 @@
     "isolatedModules": true,
     "incremental": true,
     "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "baseUrl": "."
   },
   "exclude": ["node_modules/", "dist/", "tests/fixtures/"],
   "include": [

@@ -1,6 +1,6 @@
-import { Result, Unpacked } from "@/types";
 import { PrismaClient } from "@prisma/client";
 
+import { Result, Unpacked } from "../../types";
 import { ModelKeys, Statistics } from "./types";
 import {
   add_factory,

@@ -38,7 +38,7 @@ import qrcodeTerminal from "qrcode-terminal";
  */
 import { WechatyBuilder, types } from "wechaty";
 
-import { FlixWechatBot, App } from "@/domains/flix_bot";
+import { FlixWechatBot, App } from "./domains/flix_bot";
 
 const bot = WechatyBuilder.build({ name: "speech-bot" });
 const app = new App({
