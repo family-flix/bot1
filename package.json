@@ -58,6 +58,7 @@
     "is-pr": "^2.0.0",
     "prisma": "^4.14.0",
     "ts-node": "^10.9.1",
+    "typescript": "^5.3.3",
     "wechaty-puppet-mock": "^1.18.2"
   },
   "git": {
