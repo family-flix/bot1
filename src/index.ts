@@ -24,9 +24,9 @@ import {
 } from "fs";
 import { PassThrough, Readable } from "stream";
 
-import request from "request";
-import Ffmpeg from "fluent-ffmpeg";
-import querystring from "querystring";
+// import request from "request";
+// import Ffmpeg from "fluent-ffmpeg";
+// import querystring from "querystring";
 
 /* tslint:disable:variable-name */
 import qrcodeTerminal from "qrcode-terminal";
