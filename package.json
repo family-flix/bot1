@@ -37,6 +37,7 @@
     "@prisma/client": "4.16.2",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.0",
+    "execa": "^8.0.1",
     "memory-card": "^1.0.3",
     "mitt": "^3.0.0",
     "qrcode-terminal": "^0.12.0",
