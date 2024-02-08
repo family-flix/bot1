@@ -90,38 +90,38 @@ export class FlixWechatBot {
       if (!name) {
         return Result.Err("缺少搜索关键字");
       }
-      const medias = await this.$store.prisma.media.findMany({
-        where: {
-          profile: {
-            OR: [
-              {
-                name: {
-                  contains: name,
-                },
-              },
-              {
-                original_name: {
-                  contains: name,
-                },
-              },
-              {
-                alias: {
-                  contains: name,
-                },
-              },
-            ],
-          },
-        },
-        include: {
-          profile: true,
-        },
-        take: 5,
-      });
-      const media_names = medias.map((media) => {
-        const { profile } = media;
-        return profile.name;
-      });
-      return Result.Ok(media_names.join("\n"));
+      // const medias = await this.$store.prisma.media.findMany({
+      //   where: {
+      //     profile: {
+      //       OR: [
+      //         {
+      //           name: {
+      //             contains: name,
+      //           },
+      //         },
+      //         {
+      //           original_name: {
+      //             contains: name,
+      //           },
+      //         },
+      //         {
+      //           alias: {
+      //             contains: name,
+      //           },
+      //         },
+      //       ],
+      //     },
+      //   },
+      //   include: {
+      //     profile: true,
+      //   },
+      //   take: 5,
+      // });
+      // const media_names = medias.map((media) => {
+      //   const { profile } = media;
+      //   return profile.name;
+      // });
+      return Result.Ok('bingo');
     }
     return Result.Err(`未知命令 '${text}'`);
   }
