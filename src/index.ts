@@ -29,7 +29,7 @@ import { PassThrough, Readable } from "stream";
 // import Ffmpeg from "fluent-ffmpeg";
 // import querystring from "querystring";
 
-import execa from "execa";
+// import execa from "execa";
 /* tslint:disable:variable-name */
 import qrcodeTerminal from "qrcode-terminal";
 
@@ -43,12 +43,12 @@ import { WechatyBuilder, types } from "wechaty";
 import { FlixWechatBot, App } from "./domains/flix_bot";
 
 async function main() {
-  try {
-    const { stdout } = await execa.execa("yarn", ["prisma generate"]);
-    console.log(stdout);
-  } catch (error) {
-    console.error(error);
-  }
+  // try {
+  //   const { stdout } = await execa.execa("yarn", ["prisma generate"]);
+  //   console.log(stdout);
+  // } catch (error) {
+  //   console.error(error);
+  // }
   const bot = WechatyBuilder.build({ name: "speech-bot" });
   const app = new App({
     root_path: process.env.OUTPUT_PATH || process.cwd(),
