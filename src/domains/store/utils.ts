@@ -2,13 +2,10 @@ import dayjs from "dayjs";
 import { PrismaClient } from "@prisma/client";
 
 import { FileType } from "@/constants";
-import { List } from "@/domains/list";
-import { Folder } from "@/domains/folder";
 import { Result, resultify, Unpacked } from "@/types";
 import { sleep } from "@/utils";
 
 import { ModelKeys, ModelParam, ModelQuery } from "./types";
-import { DatabaseStore } from ".";
 
 const defaultRandomAlphabet =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -221,130 +218,4 @@ export async function walk_records<T extends PrismaClient[ModelKeys]>(
     }
   } while (no_more === false);
   return Result.Ok(null);
-}
-
-/**
- * 本地存储的 folder client，和 drive client 等同使用
- * @param body
- * @param store
- * @returns
- */
-export function folder_client(
-  body: { drive_id: string },
-  store: DatabaseStore
-) {
-  const { drive_id } = body;
-  return {
-    async fetch_file(id: string) {
-      const r = await store.find_file({ file_id: id, drive_id });
-      if (r.error) {
-        return r;
-      }
-      if (!r.data) {
-        return Result.Err("No matched record");
-      }
-      return Result.Ok({
-        ...r.data,
-        type: r.data.type === 1 ? "file" : "folder",
-      });
-    },
-    async fetch_files(id: string, options: { marker?: string } = {}) {
-      const { marker } = options;
-      const page_size = 20;
-      const r = await resultify(
-        store.prisma.file.findMany.bind(store.prisma.file)
-      )({
-        where: {
-          parent_file_id: id,
-          drive_id: drive_id,
-          name: marker === "" ? undefined : { lte: marker },
-        },
-        orderBy: {
-          name: "desc",
-        },
-        take: page_size + 1,
-      });
-      if (r.error) {
-        return r;
-      }
-      const rows = r.data.map((f) => {
-        const { file_id, parent_file_id, name, type } = f;
-        return {
-          file_id,
-          parent_file_id,
-          name,
-          type: type === FileType.File ? "file" : "folder",
-        };
-      });
-      const has_next_page = rows.length === page_size + 1 && rows[page_size];
-      const next_marker = has_next_page ? rows[page_size].name : "";
-      const result = {
-        items: rows.slice(0, page_size),
-        next_marker,
-      };
-      return Result.Ok(result);
-    },
-  } as Folder["client"];
-}
-
-export async function walk_model_with_cursor<
-  F extends (extra: { take: number }) => any
->(options: {
-  fn: F;
-  page_size?: number;
-  handler?: (
-    data: Unpacked<ReturnType<F>>[number],
-    index: number,
-    finish: () => void
-  ) => any;
-  batch_handler?: (
-    list: Unpacked<ReturnType<F>>[number][],
-    index: number
-  ) => any;
-}) {
-  const { fn, page_size = 20, handler, batch_handler } = options;
-  let next_marker = "";
-  let no_more = false;
-  let index = 0;
-  let need_break = false;
-  // const count = await store.prisma.file.count({ where });
-  do {
-    const extra_args = {
-      take: page_size + 1,
-      ...(() => {
-        const cursor: { id?: string } = {};
-        if (next_marker) {
-          cursor.id = next_marker;
-          return {
-            cursor,
-          };
-        }
-        return {};
-      })(),
-    };
-    const list = await fn(extra_args);
-    no_more = list.length < page_size + 1;
-    next_marker = "";
-    if (list.length === page_size + 1) {
-      const last_record = list[list.length - 1];
-      next_marker = last_record.id;
-    }
-    const correct_list = list.slice(0, page_size);
-    if (batch_handler) {
-      await batch_handler(correct_list, index);
-    }
-    for (let i = 0; i < correct_list.length; i += 1) {
-      const data = correct_list[i];
-      if (handler) {
-        await handler(data, index, () => {
-          need_break = true;
-          no_more = true;
-        });
-        if (need_break) {
-          return;
-        }
-      }
-      index += 1;
-    }
-  } while (no_more === false);
 }

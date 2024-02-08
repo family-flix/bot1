@@ -2,10 +2,10 @@
  * @file 机器人
  * yarn esbuild domains/bot/index.ts --bundle --platform=node --format=cjs --minify --outfile=dist/bot.js
  */
-import { ReadStream } from "fs";
+import type { ReadStream } from "fs";
 
 import { Application } from "@/domains/application";
-import { DatabaseStore } from "@/domains/store";
+import type { DatabaseStore } from "@/domains/store";
 import { SpeechToText } from "@/domains/speech";
 import { Result } from "@/types";
 

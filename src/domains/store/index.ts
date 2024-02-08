@@ -1,5 +1,4 @@
 import { Result, Unpacked } from "@/types";
-import { bytes_to_size } from "@/utils";
 import { PrismaClient } from "@prisma/client";
 
 import { ModelKeys, Statistics } from "./types";
