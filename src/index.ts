@@ -47,7 +47,7 @@ import {
   types,
 } from "wechaty";
 
-// import { FlixWechatBot, App } from "./domains/flix_bot/index";
+import { FlixWechatBot, App } from "./domains/flix_bot/index";
 
 // try {
 //   const { stdout } = await execa.execa("yarn", ["prisma generate"]);
@@ -55,6 +55,13 @@ import {
 // } catch (error) {
 //   console.error(error);
 // }
+
+const bot = WechatyBuilder.build({ name: "speech-bot" });
+const app = new App({
+  root_path: process.env.OUTPUT_PATH || process.cwd(),
+  env: process.env as Record<string, string>,
+});
+const client = new FlixWechatBot({ app });
 
 function onScan(qrcode: string, status: ScanStatus) {
   if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
@@ -103,16 +110,14 @@ async function onMessage(msg: Message) {
   msgFile.toFile(filename);
 
   const mp3Stream = createReadStream(filename);
+  const r = await client.handleAudio(mp3Stream);
+  if (r.error) {
+    msg.say(r.error.message);
+    return;
+  }
+  msg.say(r.data);
 }
 
-const bot = WechatyBuilder.build({ name: "speech-bot" });
-// const app = new App({
-//   root_path: process.env.OUTPUT_PATH || process.cwd(),
-//   env: process.env as Record<string, string>,
-// });
-// const client = new FlixWechatBot({ app });
-
-// bot.start().catch((e) => console.error("bot.start() error: " + e));
 bot.on("scan", onScan);
 bot.on("login", onLogin);
 bot.on("logout", onLogout);
