@@ -86,7 +86,7 @@ export class FlixWechatBot {
     }
     const text = r2.data;
     if (text.match(/^搜索/)) {
-      const name = text.replace(/^搜索/, "");
+      const name = text.replace(/^搜索/, "").trim();
       if (!name) {
         return Result.Err("缺少搜索关键字");
       }
@@ -117,6 +117,9 @@ export class FlixWechatBot {
         },
         take: 5,
       });
+      if (medias.length === 0) {
+        return Result.Err(`'${name}' 没有匹配结果`);
+      }
       const media_names = medias.map((media) => {
         const { profile } = media;
         return profile.name;
