@@ -1,27 +1,7 @@
-#!/usr/bin/env -S node --no-warnings --loader loader.js
-/**
- *   Wechaty - https://github.com/chatie/wechaty
- *
- *   @copyright 2016-2018 Huan LI <zixia@zixia.net>
- *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
- */
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-import {
-  // createWriteStream,
-  createReadStream,
-} from "fs";
+import { createReadStream, statSync, readdirSync } from "fs";
+import path from "path";
 import { PassThrough, Readable } from "stream";
 // import { exec } from "child_process";
 
@@ -37,13 +17,26 @@ import {
   Message,
   ScanStatus,
   WechatyBuilder,
-  log,
+  // UrlLink,
   types,
+  log,
 } from "wechaty";
 
 import { FlixWechatBot, App } from "./domains/flix_bot/index";
+import { ensure_sync } from "./utils/fs";
 
-const bot = WechatyBuilder.build({ name: "speech-bot" });
+const bot = WechatyBuilder.build({
+  name: "speech-bot",
+  puppet: "wechaty-puppet-wechat",
+  puppetOptions: {
+    uos: true,
+  },
+});
+process.env.VOICE_RECOGNIZE_SECRET_ID = "AKID7IKDsOhqCRZmodEd2Sl5YrwlS0Vp21zt";
+process.env.VOICE_RECOGNIZE_SECRET_KEY = "x30mKhspbEtStCYO8kAZsCStEVfiYJxV";
+process.env.OUTPUT_PATH = "/apps/flix_prod";
+process.env.DATABASE_PATH =
+  "/apps/flix_prod/data/family-flix.db?connection_limit=1";
 const app = new App({
   root_path: process.env.OUTPUT_PATH || process.cwd(),
   env: process.env as Record<string, string>,
@@ -79,26 +72,52 @@ function onLogout(user: Contact) {
 }
 
 async function onMessage(msg: Message) {
-  console.log(`RECV: ${msg}`, msg.type());
-  log.info("StarterBot", msg.toString());
-
+  console.log(`RECV: ${msg}`, msg.type(), msg.age());
+  // log.info("StarterBot", msg.toString());
+  if (msg.self()) {
+    return;
+  }
+  if (msg.age() > 30) {
+    await msg.say("outdate");
+    return;
+  }
   if (msg.text() === "ding") {
     await msg.say("dong");
     return;
   }
-
-  if (msg.type() === types.Message.Audio) {
-    // const mp3Stream = await msg.readyStream();
-    const msgFile = await msg.toFileBox();
-    const filename = msgFile.name;
-    msgFile.toFile(filename);
-    const mp3Stream = createReadStream(filename);
+  // if (msg.text() === "link") {
+  //   const urlLink = new UrlLink({
+  //     description:
+  //       "WeChat Bot SDK for Individual Account, Powered by TypeScript, Docker, and Love",
+  //     thumbnailUrl:
+  //       "https://avatars0.githubusercontent.com/u/25162437?s=200&v=4",
+  //     title: "Welcome to Wechaty",
+  //     url: "https://github.com/chatie/wechaty",
+  //   });
+  //   msg.say(urlLink);
+  //   return;
+  // }
+  const fileTypeList = [
+    bot.Message.Type.Attachment,
+    bot.Message.Type.Audio,
+    bot.Message.Type.Image,
+    bot.Message.Type.Video,
+  ];
+  if (fileTypeList.includes(msg.type())) {
+    const fileBox = await msg.toFileBox();
+    // console.log(Buffer.byteLength(await fileBox.toBuffer()));
+    const filename = fileBox.name;
+    const cwd = process.cwd();
+    const folderpath = path.resolve(cwd, "./files", filename);
+    ensure_sync(folderpath);
+    await fileBox.toFile(folderpath);
+    const mp3Stream = createReadStream(folderpath);
     const r = await client.handleAudio(mp3Stream);
     if (r.error) {
-      msg.say(r.error.message);
+      await msg.say(r.error.message);
       return;
     }
-    msg.say(r.data);
+    await msg.say(r.data);
   }
 }
 
