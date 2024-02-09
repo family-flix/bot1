@@ -97,6 +97,7 @@ async function onMessage(msg: Message) {
 
   if (msg.text() === "ding") {
     await msg.say("dong");
+    return;
   }
 
   if (msg.type() !== types.Message.Audio) {

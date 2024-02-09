@@ -29,22 +29,21 @@ export class FlixWechatBot {
     const r1 = text.match(/^\/bind ([0-9a-zA-Z]{15})/);
     if (r1) {
       const [, id] = r1;
-      const matched = await this.$store.prisma.member.findFirst({
-        where: {
-          id,
-        },
-      });
-      if (!matched) {
-        return Result.Err("没有匹配的成员");
-      }
-      await this.$store.prisma.member.update({
-        where: {
-          id: matched.id,
-        },
-        data: {
-          // ...
-        },
-      });
+      // const matched = await this.$store.prisma.member.findFirst({
+      //   where: {
+      //     id,
+      //   },
+      // });
+      // if (!matched) {
+      //   return Result.Err("没有匹配的成员");
+      // }
+      // await this.$store.prisma.member.update({
+      //   where: {
+      //     id: matched.id,
+      //   },
+      //   data: {
+      //   },
+      // });
       return Result.Ok({
         msg: "绑定成功",
       });
@@ -77,6 +76,8 @@ export class FlixWechatBot {
       return Result.Err(r.error.message);
     }
     const data = r.data;
+    console.log("audio base64", data);
+    console.log("secret", secret_id, secret_key);
     const client = new SpeechToText({
       secret_id,
       secret_key,
@@ -122,7 +123,7 @@ export class FlixWechatBot {
       //   const { profile } = media;
       //   return profile.name;
       // });
-      return Result.Ok('bingo');
+      return Result.Ok("bingo");
     }
     return Result.Err(`未知命令 '${text}'`);
   }
