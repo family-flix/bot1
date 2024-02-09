@@ -38,9 +38,16 @@ import qrcodeTerminal from "qrcode-terminal";
  * to     `import { ... } from 'wechaty'`
  * when you are runing with Docker or NPM instead of Git Source.
  */
-import { WechatyBuilder, types } from "wechaty";
+import {
+  Contact,
+  Message,
+  ScanStatus,
+  WechatyBuilder,
+  log,
+  types,
+} from "wechaty";
 
-import { FlixWechatBot, App } from "./domains/flix_bot/index";
+// import { FlixWechatBot, App } from "./domains/flix_bot/index";
 
 // try {
 //   const { stdout } = await execa.execa("yarn", ["prisma generate"]);
@@ -48,43 +55,70 @@ import { FlixWechatBot, App } from "./domains/flix_bot/index";
 // } catch (error) {
 //   console.error(error);
 // }
+
+function onScan(qrcode: string, status: ScanStatus) {
+  if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
+    const qrcodeImageUrl = [
+      "https://wechaty.js.org/qrcode/",
+      encodeURIComponent(qrcode),
+    ].join("");
+    log.info(
+      "StarterBot",
+      "onScan: %s(%s) - %s",
+      ScanStatus[status],
+      status,
+      qrcodeImageUrl
+    );
+
+    qrcodeTerminal.generate(qrcode, { small: true }); // show qrcode on console
+  } else {
+    log.info("StarterBot", "onScan: %s(%s)", ScanStatus[status], status);
+  }
+}
+
+function onLogin(user: Contact) {
+  log.info("StarterBot", "%s login", user);
+}
+
+function onLogout(user: Contact) {
+  log.info("StarterBot", "%s logout", user);
+}
+
+async function onMessage(msg: Message) {
+  console.log(`RECV: ${msg}`, msg.type());
+  log.info("StarterBot", msg.toString());
+
+  if (msg.text() === "ding") {
+    await msg.say("dong");
+  }
+
+  if (msg.type() !== types.Message.Audio) {
+    return; // skip no-VOICE message
+  }
+
+  // const mp3Stream = await msg.readyStream()
+
+  const msgFile = await msg.toFileBox();
+  const filename = msgFile.name;
+  msgFile.toFile(filename);
+
+  const mp3Stream = createReadStream(filename);
+}
+
 const bot = WechatyBuilder.build({ name: "speech-bot" });
-const app = new App({
-  root_path: process.env.OUTPUT_PATH || process.cwd(),
-  env: process.env as Record<string, string>,
-});
-const client = new FlixWechatBot({ app });
+// const app = new App({
+//   root_path: process.env.OUTPUT_PATH || process.cwd(),
+//   env: process.env as Record<string, string>,
+// });
+// const client = new FlixWechatBot({ app });
+
+// bot.start().catch((e) => console.error("bot.start() error: " + e));
+bot.on("scan", onScan);
+bot.on("login", onLogin);
+bot.on("logout", onLogout);
+bot.on("message", onMessage);
+
 bot
-  .on("scan", (qrcode, status) => {
-    qrcodeTerminal.generate(qrcode);
-    console.log(`${qrcode}\n[${status}] Scan QR Code in above url to login: `);
-  })
-  .on("login", (user) => console.log(`${user} logined`))
-  .on("message", async function (msg) {
-    console.log(`RECV: ${msg}`);
-
-    if (msg.type() !== types.Message.Audio) {
-      return; // skip no-VOICE message
-    }
-
-    // const mp3Stream = await msg.readyStream()
-
-    const msgFile = await msg.toFileBox();
-    const filename = msgFile.name;
-    msgFile.toFile(filename);
-
-    const mp3Stream = createReadStream(filename);
-    const r1 = await client.handleAudio(mp3Stream);
-    if (r1.error) {
-      await msg.say(r1.error.message);
-      return;
-    }
-    await msg.say(r1.data);
-    //     if (msg.self()) {
-    //       await bot.say(text); // send text to 'filehelper'
-    //     } else {
-    //       await msg.say(text); // to original sender
-    //     }
-  });
-
-bot.start().catch((e) => console.error("bot.start() error: " + e));
+  .start()
+  .then(() => log.info("StarterBot", "Starter Bot Started."))
+  .catch((e) => log.error("StarterBot", e));
