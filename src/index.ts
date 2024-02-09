@@ -42,55 +42,49 @@ import { WechatyBuilder, types } from "wechaty";
 
 import { FlixWechatBot, App } from "./domains/flix_bot/index";
 
-async function main() {
-  // try {
-  //   const { stdout } = await execa.execa("yarn", ["prisma generate"]);
-  //   console.log(stdout);
-  // } catch (error) {
-  //   console.error(error);
-  // }
-  const bot = WechatyBuilder.build({ name: "speech-bot" });
-  const app = new App({
-    root_path: process.env.OUTPUT_PATH || process.cwd(),
-    env: process.env as Record<string, string>,
+// try {
+//   const { stdout } = await execa.execa("yarn", ["prisma generate"]);
+//   console.log(stdout);
+// } catch (error) {
+//   console.error(error);
+// }
+const bot = WechatyBuilder.build({ name: "speech-bot" });
+const app = new App({
+  root_path: process.env.OUTPUT_PATH || process.cwd(),
+  env: process.env as Record<string, string>,
+});
+const client = new FlixWechatBot({ app });
+bot
+  .on("scan", (qrcode, status) => {
+    qrcodeTerminal.generate(qrcode);
+    console.log(`${qrcode}\n[${status}] Scan QR Code in above url to login: `);
+  })
+  .on("login", (user) => console.log(`${user} logined`))
+  .on("message", async function (msg) {
+    console.log(`RECV: ${msg}`);
+
+    if (msg.type() !== types.Message.Audio) {
+      return; // skip no-VOICE message
+    }
+
+    // const mp3Stream = await msg.readyStream()
+
+    const msgFile = await msg.toFileBox();
+    const filename = msgFile.name;
+    msgFile.toFile(filename);
+
+    const mp3Stream = createReadStream(filename);
+    const r1 = await client.handleAudio(mp3Stream);
+    if (r1.error) {
+      await msg.say(r1.error.message);
+      return;
+    }
+    await msg.say(r1.data);
+    //     if (msg.self()) {
+    //       await bot.say(text); // send text to 'filehelper'
+    //     } else {
+    //       await msg.say(text); // to original sender
+    //     }
   });
-  const client = new FlixWechatBot({ app });
-  bot
-    .on("scan", (qrcode, status) => {
-      qrcodeTerminal.generate(qrcode);
-      console.log(
-        `${qrcode}\n[${status}] Scan QR Code in above url to login: `
-      );
-    })
-    .on("login", (user) => console.log(`${user} logined`))
-    .on("message", async function (msg) {
-      console.log(`RECV: ${msg}`);
 
-      if (msg.type() !== types.Message.Audio) {
-        return; // skip no-VOICE message
-      }
-
-      // const mp3Stream = await msg.readyStream()
-
-      const msgFile = await msg.toFileBox();
-      const filename = msgFile.name;
-      msgFile.toFile(filename);
-
-      const mp3Stream = createReadStream(filename);
-      const r1 = await client.handleAudio(mp3Stream);
-      if (r1.error) {
-        await msg.say(r1.error.message);
-        return;
-      }
-      await msg.say(r1.data);
-      //     if (msg.self()) {
-      //       await bot.say(text); // send text to 'filehelper'
-      //     } else {
-      //       await msg.say(text); // to original sender
-      //     }
-    });
-
-  bot.start().catch((e) => console.error("bot.start() error: " + e));
-}
-
-main();
+bot.start().catch((e) => console.error("bot.start() error: " + e));
