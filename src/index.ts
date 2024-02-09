@@ -29,15 +29,9 @@ import { PassThrough, Readable } from "stream";
 // import Ffmpeg from "fluent-ffmpeg";
 // import querystring from "querystring";
 
-// import execa from "execa";
 /* tslint:disable:variable-name */
+import "dotenv/config.js";
 import qrcodeTerminal from "qrcode-terminal";
-
-/**
- * Change `import { ... } from '../.js'`
- * to     `import { ... } from 'wechaty'`
- * when you are runing with Docker or NPM instead of Git Source.
- */
 import {
   Contact,
   Message,
@@ -49,19 +43,12 @@ import {
 
 import { FlixWechatBot, App } from "./domains/flix_bot/index";
 
-// try {
-//   const { stdout } = await execa.execa("yarn", ["prisma generate"]);
-//   console.log(stdout);
-// } catch (error) {
-//   console.error(error);
-// }
-
 const bot = WechatyBuilder.build({ name: "speech-bot" });
-const app = new App({
-  root_path: process.env.OUTPUT_PATH || process.cwd(),
-  env: process.env as Record<string, string>,
-});
-const client = new FlixWechatBot({ app });
+// const app = new App({
+//   root_path: process.env.OUTPUT_PATH || process.cwd(),
+//   env: process.env as Record<string, string>,
+// });
+// const client = new FlixWechatBot({ app });
 
 function onScan(qrcode: string, status: ScanStatus) {
   if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
@@ -106,17 +93,17 @@ async function onMessage(msg: Message) {
 
   // const mp3Stream = await msg.readyStream()
 
-  const msgFile = await msg.toFileBox();
-  const filename = msgFile.name;
-  msgFile.toFile(filename);
+  // const msgFile = await msg.toFileBox();
+  // const filename = msgFile.name;
+  // msgFile.toFile(filename);
 
-  const mp3Stream = createReadStream(filename);
-  const r = await client.handleAudio(mp3Stream);
-  if (r.error) {
-    msg.say(r.error.message);
-    return;
-  }
-  msg.say(r.data);
+  // const mp3Stream = createReadStream(filename);
+  // const r = await client.handleAudio(mp3Stream);
+  // if (r.error) {
+  //   msg.say(r.error.message);
+  //   return;
+  // }
+  // msg.say(r.data);
 }
 
 bot.on("scan", onScan);
