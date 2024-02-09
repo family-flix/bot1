@@ -44,11 +44,11 @@ import {
 import { FlixWechatBot, App } from "./domains/flix_bot/index";
 
 const bot = WechatyBuilder.build({ name: "speech-bot" });
-// const app = new App({
-//   root_path: process.env.OUTPUT_PATH || process.cwd(),
-//   env: process.env as Record<string, string>,
-// });
-// const client = new FlixWechatBot({ app });
+const app = new App({
+  root_path: process.env.OUTPUT_PATH || process.cwd(),
+  env: process.env as Record<string, string>,
+});
+const client = new FlixWechatBot({ app });
 
 function onScan(qrcode: string, status: ScanStatus) {
   if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
@@ -87,23 +87,19 @@ async function onMessage(msg: Message) {
     return;
   }
 
-  if (msg.type() !== types.Message.Audio) {
-    return; // skip no-VOICE message
+  if (msg.type() === types.Message.Audio) {
+    // const mp3Stream = await msg.readyStream();
+    const msgFile = await msg.toFileBox();
+    const filename = msgFile.name;
+    msgFile.toFile(filename);
+    const mp3Stream = createReadStream(filename);
+    const r = await client.handleAudio(mp3Stream);
+    if (r.error) {
+      msg.say(r.error.message);
+      return;
+    }
+    msg.say(r.data);
   }
-
-  // const mp3Stream = await msg.readyStream()
-
-  // const msgFile = await msg.toFileBox();
-  // const filename = msgFile.name;
-  // msgFile.toFile(filename);
-
-  // const mp3Stream = createReadStream(filename);
-  // const r = await client.handleAudio(mp3Stream);
-  // if (r.error) {
-  //   msg.say(r.error.message);
-  //   return;
-  // }
-  // msg.say(r.data);
 }
 
 bot.on("scan", onScan);
